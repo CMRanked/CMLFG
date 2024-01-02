@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Add Firebase library -->
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-auth.js"></script>
+
+    <!-- CSS for the modal -->
+    <style>
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      padding-top: 100px;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+      background-color: #fefefe;
+      margin: auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+    }
+
+    .close {
+      color: #aaaaaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+      color: #000;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">LFG</div>
+            <div class="nav">
+                <a href="#" class="nav-item">Home</a>
+                <a href="#" class="nav-item">About</a>
+                <a href="#" class="nav-item">Contact</a>
+            </div>
+        </div>
+        <div class="form">
+            <div class="form-card">
+                <h2 class="form-title">Log In or Register</h2>
+                <div class="form-group">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" id="email" name="email" class="form-input" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" id="password" name="password" class="form-input" placeholder="Enter your password" required>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="form-button">Log In</button>
+                </div>
+                <div class="form-group">
+                    <a href="#" class="form-link">Forgot your password?</a>
+                </div>
+                <div class="form-group">
+                    <a href="#" class="form-button">Register</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+      <!-- Modal content -->
+      <div class="modal-content">
+        <span class="close">×</span>
+        <p id="modalText"></p>
+      </div>
+    </div>
+
+    <script>
+// Initialize Firebase
+var firebaseConfig = {
+  apiKey: "AIzaSyDxWYgfTWmxG1yTHZF2w2aMUh_o4G4_PkQ",
+  authDomain: "cmranked-ec1cb.firebaseapp.com",
+  projectId: "cmranked-ec1cb",
+  storageBucket: "cmranked-ec1cb.appspot.com",
+  messagingSenderId: "995064065188",
+  appId: "1:995064065188:web:1a3c0c0aeedb38d1148a31",
+  measurementId: "G-TGYRTD0M9E"
+};
+firebase.initializeApp(firebaseConfig);
+
+// Check if user is already logged in
+firebase.auth().onAuthStateChanged(function(user) {
+    if (user) {
+        // User is signed in, redirect to profile page
+        window.location.href = "/profile.html";
+    }
+});
+
+// Login
+document.querySelector('.form-button').addEventListener('click', function(event) {
+    event.preventDefault();
+    var email = document.querySelector('#email').value;
+    var password = document.querySelector('#password').value;
+    firebase.auth().signInWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+        // Show a modal popup instead of an alert
+        showModal('Logged in successfully');
+        // Redirect to profile page
+        window.location.href = "/profile.html";
+    })
+    .catch((error) => {
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // Show a modal popup instead of an alert
+        showModal("Error: " + errorMessage);
+    });
+});
+
+// Registration
+document.querySelector('.form-button').addEventListener('click', function(event) {
+    event.preventDefault();
+    var email = document.querySelector('#email').value;
+    var password = document.querySelector('#password').value;
+    firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+        // Show a modal popup instead of an alert
+        showModal('Registered successfully');
+        // Redirect to profile page
+        window.location.href = "/profile.html";
+    })
+    .catch((error) => {
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // Show a modal popup instead of an alert
+        showModal("Error: " + errorMessage);
+    });
+});
+
+// Get the modal
+var modal = document.getElementById("myModal");
+
+// Get the <span> element that closes the modal
+var span = document.getElementsByClassName("close")[0];
+
+// When the user clicks on <span> (x), close the modal
+span.onclick = function() {
+  modal.style.display = "none";
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+}
+
+// Function to show a modal popup
+function showModal(message) {
+  document.getElementById('modalText').innerText = message;
+  modal.style.display = "block";
+}
+    </script>
+</body>
+</html>
