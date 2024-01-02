@@ -5,8 +5,164 @@
     <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-auth.js"></script>
 
+    <!-- Add Font Awesome icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+
     <!-- CSS for the modal -->
     <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(to right, #0f0c29, #302b63, #24243e);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 80%;
+    }
+
+    .logo {
+      font-size: 36px;
+      font-weight: bold;
+      color: white;
+    }
+
+    .nav {
+      display: flex;
+      gap: 20px;
+    }
+
+    .nav-item {
+      text-decoration: none;
+      color: white;
+      font-size: 18px;
+    }
+
+    .nav-item:hover {
+      color: #ff9a76;
+    }
+
+    .form {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 80%;
+      margin-top: 50px;
+    }
+
+    .form-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 400px;
+      height: 500px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .form-title {
+      font-size: 24px;
+      font-weight: bold;
+      color: #0f0c29;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 80%;
+      margin-bottom: 10px;
+    }
+
+    .form-label {
+      font-size: 16px;
+      font-weight: normal;
+      color: #0f0c29;
+      margin-bottom: 5px;
+    }
+
+    .form-input {
+      width: 100%;
+      height: 40px;
+      border: none;
+      border-bottom: 2px solid #0f0c29;
+      outline: none;
+      font-size: 16px;
+      font-weight: normal;
+      color: #0f0c29;
+      padding-left: 5px;
+    }
+
+    .form-input:focus {
+      border-bottom: 2px solid #ff9a76;
+    }
+
+    .form-button {
+      width: 100%;
+      height: 40px;
+      border: none;
+      border-radius: 5px;
+      background: #ff9a76;
+      outline: none;
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+      cursor: pointer;
+    }
+
+    .form-button:hover {
+      background: #ff7f50;
+    }
+
+    .form-link {
+      text-decoration: none;
+      color: #0f0c29;
+      font-size: 14px;
+    }
+
+    .form-link:hover {
+      color: #ff9a76;
+    }
+
+    .social {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .social-icon {
+      width: 40px;
+      height: 40px;
+      border: none;
+      border-radius: 50%;
+      background: #0f0c29;
+      outline: none;
+      font-size: 20px;
+      color: white;
+      cursor: pointer;
+    }
+
+    .social-icon:hover {
+      background: #ff9a76;
+    }
+
     .modal {
       display: none;
       position: fixed;
@@ -73,6 +229,11 @@
                 <div class="form-group">
                     <a href="#" class="form-button">Register</a>
                 </div>
+                <div class="social">
+                    <button class="social-icon"><i class="fab fa-facebook-f"></i></button>
+                    <button class="social-icon"><i class="fab fa-twitter"></i></button>
+                    <button class="social-icon"><i class="fab fa-google"></i></button>
+                </div>
             </div>
         </div>
     </div>
@@ -85,6 +246,8 @@
         <p id="modalText"></p>
       </div>
     </div>
+</body>
+</html>
 
     <script>
 // Initialize Firebase
