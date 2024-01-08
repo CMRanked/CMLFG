@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-database.js"></script>
+  <style>
+    /* Use a dark gray background for the body */
+    body {
+      background-color: #1F1F1F;
+      color: #FEFDFB; /* Use a light gray color for the text */
+      font-family: Arial, sans-serif;
+    }
+
+    /* Use a purple color for the headings */
+    h1 {
+      color: #592DD1;
+    }
+
+    /* Use a pink color for the buttons */
+    button {
+      background-color: #FC93AD;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      color: #FEFDFB;
+      cursor: pointer;
+    }
+
+    /* Add some margin and spacing for the buttons */
+    button + button {
+      margin-left: 10px;
+    }
+
+    /* Use a light gray border for the divs */
+    div {
+      border: 1px solid #F2F1F2;
+      padding: 10px;
+      margin: 10px;
+    }
+
+    /* Add some transitions and hover effects for the buttons */
+    button {
+      transition: transform 0.3s;
+    }
+
+    button:hover {
+      transform: scale(1.1);
+    }
+
+    /* Add some shadows and gradients for the buttons */
+    button {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      background-image: linear-gradient(to bottom right, #FC93AD, #FCA3BD);
+    }
+
+    /* Add some icons and labels for the buttons */
+    button:before {
+      content: "";
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      margin-right: 5px;
+      vertical-align: middle;
+      background-size: contain;
+      background-repeat: no-repeat;
+    }
+
+    #signup:before {
+      background-image: url("signup.png");
+    }
+
+    #login:before {
+      background-image: url("login.png");
+    }
+
+    #startMatchmaking:before {
+      background-image: url("matchmaking.png");
+    }
+
+    #won:before {
+      background-image: url("won.png");
+    }
+
+    #lost:before {
+      background-image: url("lost.png");
+    }
+
+    #showProfile:before {
+      background-image: url("profile.png");
+    }
+  </style>
+</head>
+<body>
+  <h1>Matchmaking System</h1>
+  <button id="signup">Sign Up</button>
+  <button id="login">Login</button>
+  <button id="startMatchmaking">Start Matchmaking</button>
+  <button id="won" disabled>I Won</button>
+  <button id="lost" disabled>I Lost</button>
+  <button id="showProfile">Show Profile</button>
+  <div id="matchInfo"></div>
+  <div id="profileInfo"></div>
+
+  <script>
+    // Initialize Firebase
+    var firebaseConfig = {
+   apiKey: "AIzaSyCbJ9CKd_Q6FvWdoR6Wgy0rrIGqGokKmbg",
+  authDomain: "cmlfg-8d8e8.firebaseapp.com",
+  databaseURL: "https://cmlfg-8d8e8-default-rtdb.firebaseio.com",
+  projectId: "cmlfg-8d8e8",
+  storageBucket: "cmlfg-8d8e8.appspot.com",
+  messagingSenderId: "982484793832",
+  appId: "1:982484793832:web:7ea55a1bce1fd93f07cc5d",
+  measurementId: "G-N45HDVJ98T"
+    };
+    firebase.initializeApp(firebaseConfig);
+    var db = firebase.database();
+    var auth = firebase.auth();
+
+    function getRank(elo) {
+      if (elo < 1200) {
+        return 'Bronze';
+      } else if (elo < 1400) {
+        return 'Silver';
+      } else if (elo < 1600) {
+        return 'Gold';
+      } else if (elo < 1800) {
+        return 'Platinum';
+      } else if (elo < 2000) {
+        return 'Diamond';
+      } else {
+        return 'Master';
+      }
+    }
+
+    document.getElementById('signup').addEventListener('click', function() {
+      var email = prompt('Enter your email');
+      var password = prompt('Enter your password');
+      var username = prompt('Enter your username');
+      auth.createUserWithEmailAndPassword(email, password).then(function() {
+        db.ref('users/' + auth.currentUser.uid).set({
+          username: username,
+          status: 'idle',
+          opponent: null,
+          wins: 0,
+          losses: 0,
+          elo: 1200,
+          rank: getRank(1200)
+        });
+      }).catch(function(error) {
+        alert('Error signing up: ' + error.message);
+      });
+    });
+
+    document.getElementById('login').addEventListener('click', function() {
+      var email = prompt('Enter your email');
+      var password = prompt('Enter your password');
+      auth.signInWithEmailAndPassword(email, password).catch(function(error) {
+        alert('Error logging in: ' + error.message);
+      });
+    });
+
+    document.getElementById('startMatchmaking').addEventListener('click', function() {
+      db.ref('users/' + auth.currentUser.uid).update({
+        status: 'matchmaking',
+        startTime: Date.now()
+      });
+    });
+
+    document.getElementById('won').addEventListener('click', function() {
+      endGame(auth.currentUser.uid, true);
+    });
+
+    document.getElementById('lost').addEventListener('click', function() {
+      endGame(auth.currentUser.uid, false);
+    });
+
+    document.getElementById('showProfile').addEventListener('click', function() {
+      db.ref('users/' + auth.currentUser.uid).once('value').then(function(snapshot) {
+        var userData = snapshot.val();
+        document.getElementById('profileInfo').innerText = 'Username: ' + userData.username + ', Wins: ' + userData.wins + ', Losses: ' + userData.losses + ', Elo: ' + userData.elo + ', Rank: ' + userData.rank;
+      });
+    });
+
+    db.ref('users').on('value', function(snapshot) {
+      snapshot.forEach(function(childSnapshot) {
+        var childData = childSnapshot.val();
+        if (childData.status === 'matchmaking') {
+          // Find another user who is also matchmaking and in the same rank
+          snapshot.forEach(function(opponentSnapshot) {
+            var opponentData = opponentSnapshot.val();
+            if (opponentData.status === 'matchmaking' && opponentData.username !== childData.username && opponentData.rank === childData.rank) {
+              // Pair the users together
+              db.ref('users/' + childSnapshot.key).update({
+                status: 'inGame',
+                opponent: opponentData.username,
+                startTime: Date.now()
+              });
+              db.ref('users/' + opponentSnapshot.key).update({
+                status: 'inGame',
+                opponent: childData.username,
+                startTime: Date.now()
+              });
+            }
+          });
+        } else if (childData.status === 'inGame' && childData.opponent !== null) {
+          document.getElementById('matchInfo').innerText = 'Match found! ' + childData.username + ' is now in a game against ' + childData.opponent + '. Please add each other and play a 3-minute Deathmatch game on any league.';
+          if (Date.now() - childData.startTime >= 3 * 60 * 1000) { // 3 minutes
+            document.getElementById('won').disabled = false;
+            document.getElementById('lost').disabled = false;
+          }
+        }
+      });
+    });
+
+    // Function to call when a game ends
+    function endGame(userId, didWin) {
+      db.ref('users/' + userId).once('value').then(function(snapshot) {
+        var userData = snapshot.val();
+        var newElo = userData.elo + (didWin ? 10 : -10);
+        db.ref('users/' + userId).update({
+          status: 'idle',
+          opponent: null,
+          wins: userData.wins + (didWin ? 1 : 0),
+          losses: userData.losses + (didWin ? 0 : 1),
+          elo: newElo,
+          rank: getRank(newElo)
+        });
+        document.getElementById('won').disabled = true;
+        document.getElementById('lost').disabled = true;
+      });
+    }
+  </script>
+</body>
+</html>
